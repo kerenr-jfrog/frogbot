@@ -26,7 +26,6 @@ import (
 	"github.com/jfrog/jfrog-client-go/utils/log"
 )
 
-
 type FrogbotDetails struct {
 	XrayVersion   string
 	XscVersion    string
@@ -174,7 +173,7 @@ func (s *Scan) setDefaultsIfNeeded() (err error) {
 		}
 	}
 	if !s.FixableOnly {
-		if s.FixableOnly, err = getBoolEnv(FixableOnlyEnv, false); err != nil {
+		if s.FixableOnly, err = getBoolEnv(ShowFixableOnlyEnv, false); err != nil {
 			return
 		}
 	}
@@ -201,7 +200,7 @@ func (s *Scan) setDefaultsIfNeeded() (err error) {
 		s.FailOnSecurityIssues = &failOnSecurityIssues
 	}
 	if s.MinSeverity == "" {
-		if err = readParamFromEnv(MinSeverityEnv, &s.MinSeverity); err != nil && !e.IsMissingEnvErr(err) {
+		if err = readParamFromEnv(IncludeMinSeverityEnv, &s.MinSeverity); err != nil && !e.IsMissingEnvErr(err) {
 			return
 		}
 	}
@@ -226,7 +225,7 @@ func (s *Scan) setDefaultsIfNeeded() (err error) {
 		}
 	}
 	if !s.AllowPartialResults {
-		if s.AllowPartialResults, err = getBoolEnv(AllowPartialResultsEnv, false); err != nil {
+		if s.AllowPartialResults, err = getBoolEnv(FailOnScannerErrorEnv, false); err != nil {
 			return
 		}
 	}
@@ -271,21 +270,21 @@ func (jp *JFrogPlatform) setDefaultsIfNeeded() (err error) {
 type Git struct {
 	GitProvider vcsutils.VcsProvider
 	vcsclient.VcsInfo
-	RepoOwner   string
-	RepoName                      string   `yaml:"repoName,omitempty"`
-	Branches                      []string `yaml:"branches,omitempty"`
-	BranchNameTemplate            string   `yaml:"branchNameTemplate,omitempty"`
-	CommitMessageTemplate         string   `yaml:"commitMessageTemplate,omitempty"`
-	PullRequestTitleTemplate      string   `yaml:"pullRequestTitleTemplate,omitempty"`
-	PullRequestCommentTitle       string   `yaml:"pullRequestCommentTitle,omitempty"`
-	PullRequestSecretComments     bool     `yaml:"pullRequestSecretComments,omitempty"`
-	AvoidExtraMessages            bool     `yaml:"avoidExtraMessages,omitempty"`
-	EmailAuthor                   string   `yaml:"emailAuthor,omitempty"`
-	AggregateFixes                bool     `yaml:"aggregateFixes,omitempty"`
-	PullRequestDetails            vcsclient.PullRequestInfo
-	RepositoryCloneUrl            string
-	UseLocalRepository            bool
-	UploadSbomToVcs               *bool `yaml:"uploadSbomToVcs,omitempty"`
+	RepoOwner                 string
+	RepoName                  string   `yaml:"repoName,omitempty"`
+	Branches                  []string `yaml:"branches,omitempty"`
+	BranchNameTemplate        string   `yaml:"branchNameTemplate,omitempty"`
+	CommitMessageTemplate     string   `yaml:"commitMessageTemplate,omitempty"`
+	PullRequestTitleTemplate  string   `yaml:"pullRequestTitleTemplate,omitempty"`
+	PullRequestCommentTitle   string   `yaml:"pullRequestCommentTitle,omitempty"`
+	PullRequestSecretComments bool     `yaml:"pullRequestSecretComments,omitempty"`
+	AvoidExtraMessages        bool     `yaml:"avoidExtraMessages,omitempty"`
+	EmailAuthor               string   `yaml:"emailAuthor,omitempty"`
+	AggregateFixes            bool     `yaml:"aggregateFixes,omitempty"`
+	PullRequestDetails        vcsclient.PullRequestInfo
+	RepositoryCloneUrl        string
+	//UseLocalRepository        bool
+	UploadSbomToVcs *bool `yaml:"uploadSbomToVcs,omitempty"`
 }
 
 func (g *Git) GetRepositoryHttpsCloneUrl(gitClient vcsclient.VcsClient) (string, error) {
@@ -349,7 +348,7 @@ func (g *Git) extractScanPullRequestEnvParams(gitParamsFromEnv *Git) (err error)
 		g.PullRequestCommentTitle = getTrimmedEnv(PullRequestCommentTitleEnv)
 	}
 	if !g.PullRequestSecretComments {
-		if g.PullRequestSecretComments, err = getBoolEnv(PullRequestSecretCommentsEnv, false); err != nil {
+		if g.PullRequestSecretComments, err = getBoolEnv(IncludeSecretsFindingEnv, false); err != nil {
 			return
 		}
 	}
@@ -642,7 +641,6 @@ func SanitizeEnv() error {
 	}
 	return nil
 }
-
 
 func setProjectInstallCommand(installCommand string, project *Project) {
 	parts := strings.Fields(installCommand)
