@@ -34,51 +34,29 @@ const (
 	jfrogReleasesRepoEnv   = "JF_RELEASES_REPO"
 	JFrogPasswordEnv       = "JF_PASSWORD"
 	JFrogTokenEnv          = "JF_ACCESS_TOKEN"
-	//JfrogUseConfigProfileEnv = "JF_USE_CONFIG_PROFILE"
-	//JfrogConfigProfileEnv = "JF_CONFIG_PROFILE"
 
 	// Git environment variables
-	GitProvider     = "JF_GIT_PROVIDER"
-	GitRepoOwnerEnv = "JF_GIT_OWNER"
-	GitRepoEnv      = "JF_GIT_REPO"
-	GitProjectEnv   = "JF_GIT_PROJECT"
-	GitUsernameEnv  = "JF_GIT_USERNAME"
-	//GitUseLocalRepositoryEnv        = "JF_USE_LOCAL_REPOSITORY"
+	GitProvider                     = "JF_GIT_PROVIDER"
+	GitRepoOwnerEnv                 = "JF_GIT_OWNER"
+	GitRepoEnv                      = "JF_GIT_REPO"
+	GitProjectEnv                   = "JF_GIT_PROJECT"
+	GitUsernameEnv                  = "JF_GIT_USERNAME"
 	GitDependencyGraphSubmissionEnv = "JF_UPLOAD_SBOM_TO_VCS" // TODO: what about this var?
 
 	// Git naming template environment variables
 	BranchNameTemplateEnv       = "JF_BRANCH_NAME_TEMPLATE"
 	CommitMessageTemplateEnv    = "JF_COMMIT_MESSAGE_TEMPLATE"
 	PullRequestTitleTemplateEnv = "JF_PULL_REQUEST_TITLE_TEMPLATE"
-	//PullRequestCommentTitleEnv  = "JF_PR_COMMENT_TITLE"
+
 	//#nosec G101 -- not a secret
 	IncludeSecretsFindingEnv = "JF_INCLUDE_SECRETS_FINDINGS"
 
-	// Repository environment variables
-	//InstallCommandEnv   = "JF_INSTALL_DEPS_CMD"
-	//MaxPnpmTreeDepthEnv = "JF_PNPM_MAX_TREE_DEPTH"
-	//RequirementsFileEnv = "JF_REQUIREMENTS_FILE"
-	//WorkingDirectoryEnv = "JF_WORKING_DIR"
-	//PathExclusionsEnv = "JF_PATH_EXCLUSIONS"
-	//jfrogWatchesEnv = "JF_WATCHES"
-	//jfrogProjectEnv = "JF_PROJECT"
 	// To include vulnerabilities and violations
 	IncludeVulnerabilitiesEnv = "JF_INCLUDE_VULNERABILITIES"
-	// To include all the vulnerabilities in the source branch at PR scan
-	//IncludeAllVulnerabilitiesEnv       = "JF_INCLUDE_ALL_VULNERABILITIES"
-	//AvoidPreviousPrCommentsDeletionEnv = "JF_AVOID_PREVIOUS_PR_COMMENTS_DELETION"
-	//AddPrCommentOnSuccessEnv = "JF_PR_ADD_SUCCESS_COMMENT"
-	//FailOnSecurityIssuesEnv = "JF_FAIL"
-	//UseWrapperEnv          = "JF_USE_WRAPPER"
-	//DepsRepoEnv            = "JF_DEPS_REPO"
-	IncludeMinSeverityEnv = "JF_INCLUDE_MIN_SEVERITY"
-	ShowFixableOnlyEnv    = "JF_SHOW_FIXABLE_ONLY"
-	//DisableJasEnv          = "JF_DISABLE_ADVANCED_SECURITY"
-	//DetectionOnlyEnv       = "JF_SKIP_AUTOFIX"
-	//AllowedLicensesEnv     = "JF_ALLOWED_LICENSES"
-	//SkipAutoInstallEnv     = "JF_SKIP_AUTO_INSTALL"
-	FailOnScannerErrorEnv = "JF_FAIL_ON_SCANNER_ERROR"
-	WatchesDelimiter      = ","
+	IncludeMinSeverityEnv     = "JF_INCLUDE_MIN_SEVERITY"
+	ShowFixableOnlyEnv        = "JF_SHOW_FIXABLE_ONLY"
+	FailOnScannerErrorEnv     = "JF_FAIL_ON_SCANNER_ERROR"
+	WatchesDelimiter          = ","
 
 	//#nosec G101 -- False positive - no hardcoded credentials.
 	GitTokenEnv          = "JF_GIT_TOKEN"
@@ -86,7 +64,6 @@ const (
 	GitPullRequestIDEnv  = "JF_GIT_PULL_REQUEST_ID"
 	GitApiEndpointEnv    = "JF_GIT_API_ENDPOINT"
 	GitAggregateFixesEnv = "JF_GIT_AGGREGATE_FIXES"
-	//GitEmailAuthorEnv    = "JF_GIT_EMAIL_AUTHOR"
 
 	// The 'GITHUB_ACTIONS' environment variable exists when the CI is GitHub Actions
 	GitHubActionsEnv = "GITHUB_ACTIONS"
@@ -95,9 +72,6 @@ const (
 	PackagePlaceHolder    = "{IMPACTED_PACKAGE}"
 	FixVersionPlaceHolder = "{FIX_VERSION}"
 	BranchHashPlaceHolder = "{BRANCH_NAME_HASH}"
-
-	// General flags
-	//AvoidExtraMessages = "JF_AVOID_EXTRA_MESSAGES"
 
 	// Default naming templates
 	BranchNameTemplate                       = "frogbot-" + PackagePlaceHolder + "-" + BranchHashPlaceHolder
