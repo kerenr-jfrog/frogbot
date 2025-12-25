@@ -13,9 +13,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/CycloneDX/cyclonedx-go"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
+	utils2 "github.com/jfrog/jfrog-cli-security/utils"
+	"github.com/jfrog/jfrog-cli-security/utils/formats/violationutils"
+	"github.com/jfrog/jfrog-cli-security/utils/severityutils"
 
 	"github.com/jfrog/jfrog-cli-security/utils/xsc"
 
@@ -492,7 +496,38 @@ func TestCreateVulnerabilitiesMap(t *testing.T) {
 					ResultContext: results.ResultContext{IncludeVulnerabilities: true}},
 				Targets: []*results.TargetResults{{
 					ScanTarget: results.ScanTarget{Target: "target1"},
-					ScaResults: &results.ScaScanResults{},
+					ScaResults: &results.ScaScanResults{
+						DeprecatedXrayResults: []services.ScanResponse{{
+							Vulnerabilities: []services.Vulnerability{
+								{
+									Cves: []services.Cve{
+										{Id: "CVE-2023-1234", CvssV3Score: "9.1"},
+										{Id: "CVE-2023-4321", CvssV3Score: "8.9"},
+									},
+									Severity: "Critical",
+									Components: map[string]services.Component{
+										"vuln1": {
+											FixedVersions: []string{"1.9.1", "2.0.3", "2.0.5"},
+											ImpactPaths:   [][]services.ImpactPathNode{{{ComponentId: "root"}, {ComponentId: "vuln1"}}},
+										},
+									},
+								},
+								{
+									Cves: []services.Cve{
+										{Id: "CVE-2022-1234", CvssV3Score: "7.1"},
+										{Id: "CVE-2022-4321", CvssV3Score: "7.9"},
+									},
+									Severity: "High",
+									Components: map[string]services.Component{
+										"vuln2": {
+											FixedVersions: []string{"2.4.1", "2.6.3", "2.8.5"},
+											ImpactPaths:   [][]services.ImpactPathNode{{{ComponentId: "root"}, {ComponentId: "vuln1"}, {ComponentId: "vuln2"}}},
+										},
+									},
+								},
+							},
+						}},
+					},
 					JasResults: &results.JasScansResults{},
 				}},
 			},
@@ -518,6 +553,118 @@ func TestCreateVulnerabilitiesMap(t *testing.T) {
 					ScaResults: &results.ScaScanResults{},
 					JasResults: &results.JasScansResults{},
 				}},
+				Violations: &violationutils.Violations{
+					Sca: []violationutils.CveViolation{
+						// viol1 - CVE-2023-1234
+						{
+							ScaViolation: violationutils.ScaViolation{
+								Violation: violationutils.Violation{
+									ViolationId:   "XRAY-1",
+									ViolationType: violationutils.CveViolationType,
+									Severity:      severityutils.Critical,
+									Watch:         "w1",
+								},
+								ImpactedComponent: results.CreateScaComponentFromXrayCompId("viol1"),
+								DirectComponents:  []formats.ComponentRow{{Name: "viol1", Version: "1.0.0"}},
+								ImpactPaths:       [][]formats.ComponentRow{{{Name: "root"}, {Name: "viol1", Version: "1.0.0"}}},
+							},
+							CveVulnerability: cyclonedx.Vulnerability{
+								BOMRef:      "CVE-2023-1234",
+								ID:          "XRAY-1",
+								Description: "summary-1",
+								Ratings: &[]cyclonedx.VulnerabilityRating{
+									{Score: utils2.NewFloat64Ptr(9.1), Method: cyclonedx.ScoringMethodCVSSv3, Vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"},
+								},
+							},
+							FixedVersions: &[]cyclonedx.AffectedVersions{
+								{Version: "1.9.1", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.0.3", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.0.5", Status: cyclonedx.VulnerabilityStatusNotAffected},
+							},
+						},
+						// viol1 - CVE-2023-4321
+						{
+							ScaViolation: violationutils.ScaViolation{
+								Violation: violationutils.Violation{
+									ViolationId:   "XRAY-1",
+									ViolationType: violationutils.CveViolationType,
+									Severity:      severityutils.Critical,
+									Watch:         "w1",
+								},
+								ImpactedComponent: results.CreateScaComponentFromXrayCompId("viol1"),
+								DirectComponents:  []formats.ComponentRow{{Name: "viol1", Version: "1.0.0"}},
+								ImpactPaths:       [][]formats.ComponentRow{{{Name: "root"}, {Name: "viol1", Version: "1.0.0"}}},
+							},
+							CveVulnerability: cyclonedx.Vulnerability{
+								BOMRef:      "CVE-2023-4321",
+								ID:          "XRAY-1",
+								Description: "summary-1",
+								Ratings: &[]cyclonedx.VulnerabilityRating{
+									{Score: utils2.NewFloat64Ptr(8.9), Method: cyclonedx.ScoringMethodCVSSv3, Vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"},
+								},
+							},
+							FixedVersions: &[]cyclonedx.AffectedVersions{
+								{Version: "1.9.1", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.0.3", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.0.5", Status: cyclonedx.VulnerabilityStatusNotAffected},
+							},
+						},
+						// viol2 - CVE-2022-1234
+						{
+							ScaViolation: violationutils.ScaViolation{
+								Violation: violationutils.Violation{
+									ViolationId:   "XRAY-2",
+									ViolationType: violationutils.CveViolationType,
+									Severity:      severityutils.High,
+									Watch:         "w1",
+								},
+								ImpactedComponent: results.CreateScaComponentFromXrayCompId("viol2"),
+								DirectComponents:  []formats.ComponentRow{{Name: "viol2", Version: "2.0.0"}},
+								ImpactPaths:       [][]formats.ComponentRow{{{Name: "root"}, {Name: "viol1", Version: "1.0.0"}, {Name: "viol2", Version: "2.0.0"}}},
+							},
+							CveVulnerability: cyclonedx.Vulnerability{
+								BOMRef:      "CVE-2022-1234",
+								ID:          "XRAY-2",
+								Description: "summary-2",
+								Ratings: &[]cyclonedx.VulnerabilityRating{
+									{Score: utils2.NewFloat64Ptr(7.1), Method: cyclonedx.ScoringMethodCVSSv3, Vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"},
+								},
+							},
+							FixedVersions: &[]cyclonedx.AffectedVersions{
+								{Version: "2.4.1", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.6.3", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.8.5", Status: cyclonedx.VulnerabilityStatusNotAffected},
+							},
+						},
+						// viol2 - CVE-2022-4321
+						{
+							ScaViolation: violationutils.ScaViolation{
+								Violation: violationutils.Violation{
+									ViolationId:   "XRAY-2",
+									ViolationType: violationutils.CveViolationType,
+									Severity:      severityutils.High,
+									Watch:         "w1",
+								},
+								ImpactedComponent: results.CreateScaComponentFromXrayCompId("viol2"),
+								DirectComponents:  []formats.ComponentRow{{Name: "viol2", Version: "2.0.0"}},
+								ImpactPaths:       [][]formats.ComponentRow{{{Name: "root"}, {Name: "viol1", Version: "1.0.0"}, {Name: "viol2", Version: "2.0.0"}}},
+							},
+							CveVulnerability: cyclonedx.Vulnerability{
+								BOMRef:      "CVE-2022-4321",
+								ID:          "XRAY-2",
+								Description: "summary-2",
+								Ratings: &[]cyclonedx.VulnerabilityRating{
+									{Score: utils2.NewFloat64Ptr(7.9), Method: cyclonedx.ScoringMethodCVSSv3, Vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"},
+								},
+							},
+							FixedVersions: &[]cyclonedx.AffectedVersions{
+								{Version: "2.4.1", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.6.3", Status: cyclonedx.VulnerabilityStatusNotAffected},
+								{Version: "2.8.5", Status: cyclonedx.VulnerabilityStatusNotAffected},
+							},
+						},
+					},
+				},
 			},
 			expectedMap: map[string]*utils.VulnerabilityDetails{
 				"viol1": {

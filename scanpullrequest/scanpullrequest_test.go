@@ -969,7 +969,7 @@ func preparePullRequestTest(t *testing.T, projectName string) (utils.Repository,
 	// Set test-specific environment variables
 	envVars := map[string]string{}
 
-	// Set working directories for multi-dir tests
+	// Set env var for multi-dir tests
 	if projectName == "multi-dir-test-proj" {
 		envVars[utils.RequirementsFileEnv] = "requirements.txt"
 	}
